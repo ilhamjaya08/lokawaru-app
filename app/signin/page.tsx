@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
@@ -17,6 +17,21 @@ export default function SigninPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        router.push('/dashboard');
+      } else {
+        setChecking(false);
+      }
+    };
+    checkAuth();
+  }, [router, supabase]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -56,6 +71,17 @@ export default function SigninPage() {
     });
     setLoading(false);
   };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-[#F8F9F7] flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Icon icon="mdi:loading" className="w-8 h-8 animate-spin text-[#6B9F7E]" />
+          <p className="text-lg font-bold text-[#1A1A1A]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="relative min-h-screen bg-[#F8F9F7] overflow-hidden">
