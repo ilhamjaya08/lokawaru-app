@@ -15,5 +15,9 @@ export default function Home() {
 
   if (!message) return <p>Loading...</p>
 
-  return <p>{message}</p>
+  return (
+         <h1 className="text-3xl font-bold underline">
+      Hello world! {message}
+    </h1>
+  )
 }
