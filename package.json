@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@iconify/react": "^6.0.2",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.86.0",
     "@tailwindcss/postcss": "^4.1.17",
     "framer-motion": "^12.23.25",
     "hono": "^4.10.7",
