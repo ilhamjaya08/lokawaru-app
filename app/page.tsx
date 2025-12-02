@@ -260,7 +260,7 @@ export default function HomePage() {
             className="md:col-span-3 bg-white border-4 border-[#1A1A1A] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 transform md:rotate-2 hover:rotate-0 transition-all"
           >
             <div className="w-14 h-14 bg-[#8FBC8F] border-3 border-[#1A1A1A] flex items-center justify-center mb-4">
-              <Icon icon="mdi:Indonesia" className="w-7 h-7 text-white" />
+              <Icon icon="mdi:business-outline" className="w-7 h-7 text-white" />
             </div>
             <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">
               #DukungLokal
