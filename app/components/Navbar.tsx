@@ -1,11 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useState } from 'react';
+import type { User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Navbar() {
-  const [user, setUser] = useState<object | null>(null);
-  const [loading, setLoading] = useState(false); // Set to false to avoid showing the loading state initially
+  const supabase = createClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b-4 border-[#1A1A1A] shadow-[0_4px_0px_0px_rgba(0,0,0,1)]">
@@ -41,7 +63,7 @@ export default function Navbar() {
 
           {loading ? (
             <div className="px-4 md:px-6 py-2 md:py-2.5 bg-gray-200 border-3 border-[#1A1A1A] text-sm md:text-base animate-pulse">
-              <div className="w-24 h-5 bg-gray-300"></div>
+              <div className="w-24 h-5 bg-gray-300 rounded"></div>
             </div>
           ) : user ? (
             <Link

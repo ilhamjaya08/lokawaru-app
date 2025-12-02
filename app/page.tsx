@@ -1,26 +1,44 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Icon } from '@iconify/react';
-import { useState } from 'react';
+import type { User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 import Navbar from './components/Navbar';
 
 export default function HomePage() {
+  const supabase = createClient();
   const [searchQuery, setSearchQuery] = useState('');
-  // Dummy state, mirroring the Navbar component.
-  // Set user to an object to test the logged-in view, e.g., useState<object | null>({})
-  const [user, setUser] = useState<object | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   return (
     <main className="relative min-h-screen bg-[#F8F9F7] overflow-hidden">
       <Navbar />
 
-      
       <section className="relative h-[60vh] overflow-hidden mt-16 md:mt-20">
-        
         <div className="absolute inset-0">
           <Image
             src="/hero.webp"
@@ -30,10 +48,9 @@ export default function HomePage() {
             priority
           />
           <div className="absolute inset-0 bg-white/50" />
-          <div className="absolute inset-0 bg-linear-to-b from-white/20 via-transparent to-[#F8F9F7]/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-[#F8F9F7]/60" />
         </div>
 
-        
         <div className="relative h-full flex flex-col items-center justify-center px-4 z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -66,7 +83,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      
       <div className="relative -mt-24 px-4 z-20 mb-16">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -112,7 +128,6 @@ export default function HomePage() {
         </motion.div>
       </div>
 
-      
       <section className="relative px-4 py-12 mb-8">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -121,23 +136,14 @@ export default function HomePage() {
           className="max-w-2xl mx-auto"
         >
           <div className="relative flex flex-col md:flex-row items-center justify-center gap-6">
-            
             <div className="flex items-center gap-4">
               <p className="text-lg md:text-xl font-bold text-[#2A2A2A] text-center md:text-right">
                 Atau langsung cari<br />
                 <span className="text-[#6B9F7E]">pake peta interaktif!</span>
               </p>
-
-              
               <motion.div
-                animate={{
-                  x: [0, 10, 0],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
+                animate={{ x: [0, 10, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
               >
                 <Icon
                   icon="ph:arrow-right-bold"
@@ -149,8 +155,6 @@ export default function HomePage() {
                 />
               </motion.div>
             </div>
-
-            
             <Link
               href="/explore"
               className="group relative px-8 py-4 bg-[#6B9F7E] text-white font-bold border-4 border-[#1A1A1A] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all transform hover:scale-105"
@@ -159,15 +163,12 @@ export default function HomePage() {
                 <Icon icon="mdi:map-search" className="w-6 h-6" />
                 Jelajahi Peta
               </span>
-
-              
               <div className="absolute -top-2 -right-2 w-4 h-4 bg-[#A8D5BA] border-2 border-[#1A1A1A] transform rotate-45"></div>
             </Link>
           </div>
         </motion.div>
       </section>
 
-      
       <section className="relative px-4 py-16 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
           
@@ -271,7 +272,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      
       <section className="relative px-4 py-20 mb-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -283,7 +283,6 @@ export default function HomePage() {
           <div className="bg-[#6B9F7E] border-4 border-[#1A1A1A] shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-12 relative overflow-hidden">
             <div className="absolute -top-20 -left-20 w-64 h-64 bg-white/10 rounded-full"></div>
             <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 rounded-full"></div>
-
             <div className="relative z-10">
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                 {user ? 'Siap Lanjut Eksplorasi?' : 'Siap Mulai Eksplorasi?'}
@@ -293,16 +292,8 @@ export default function HomePage() {
                   ? 'Temukan ribuan usaha lokal di sekitar lo atau kelola usaha lo dari dashboard!'
                   : 'Gabung sekarang dan temukan ribuan usaha lokal di sekitar lo. Atau daftarin usaha lo biar makin banyak yang tau!'}
               </p>
-
               {loading ? (
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <div className="px-8 py-4 bg-gray-200 border-3 border-[#1A1A1A] animate-pulse">
-                    <div className="w-40 h-6 bg-gray-300"></div>
-                  </div>
-                  <div className="px-8 py-4 bg-gray-200 border-3 border-white animate-pulse">
-                    <div className="w-40 h-6 bg-gray-300"></div>
-                  </div>
-                </div>
+                <div className="h-14"></div>
               ) : (
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <Link
@@ -336,34 +327,6 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      
-      <section className="relative px-4 py-16 mb-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {[
-              { icon: 'mdi:store', value: '1,200+', label: 'Usaha Lokal' },
-              { icon: 'mdi:account-group', value: '5,000+', label: 'Pengguna Aktif' },
-              { icon: 'mdi:map-marker', value: '150+', label: 'Kota' },
-              { icon: 'mdi:star', value: '4.8/5', label: 'Rating' },
-            ].map((stat, idx) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="bg-white border-3 border-[#1A1A1A] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 text-center hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
-              >
-                <Icon icon={stat.icon} className="w-10 h-10 mx-auto mb-3 text-[#6B9F7E]" />
-                <div className="text-3xl font-bold text-[#1A1A1A] mb-1">{stat.value}</div>
-                <div className="text-sm text-[#4A4A4A] font-medium">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      
       <footer className="relative px-4 py-8 border-t-4 border-[#1A1A1A] bg-white">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-[#4A4A4A] font-medium">
